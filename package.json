@@ -1,0 +1,30 @@
+{
+  "name": "perpustakaan-api-modul1-kel25",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REST API pencatatan peminjaman buku perpustakaan — Node.js + Express.js + Supabase, siap deploy ke Vercel.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "verify": "node scripts/verify-api.mjs"
+  },
+  "keywords": [
+    "express",
+    "supabase",
+    "rest-api",
+    "perpus"
+  ],
+  "author": "Faras Fauzan Attaqi",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1"
+  }
+}
