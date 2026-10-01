@@ -4,7 +4,13 @@ import { db, unwrap } from '../db.js';
 import { memberCode } from '../lib/codes.js';
 import { ApiError } from '../lib/errors.js';
 import { buildMeta, created, noContent, ok } from '../lib/response.js';
-import { parsePagination, parseSort, queryText, searchPattern, single } from '../lib/query.js';
+import {
+  parsePagination,
+  parseSort,
+  queryEnum,
+  queryText,
+  searchPattern,
+} from '../lib/query.js';
 import {
   assertKnownKeys,
   assertObject,
@@ -37,10 +43,8 @@ router.get('/', async (req, res) => {
   const term = queryText(req.query, 'q');
   if (term !== undefined) query = query.ilike('search_text', searchPattern(term));
 
-  const status = single(req.query.status, 'status');
-  if (status !== undefined) {
-    query = query.eq('status', enumValue(status, 'status', MEMBER_STATUS, { required: true }));
-  }
+  const status = queryEnum(req.query, 'status', MEMBER_STATUS);
+  if (status !== undefined) query = query.eq('status', status);
 
   const { data, count } = unwrap(await query.order(column, { ascending }).range(from, to));
   return ok(res, data, buildMeta(page, limit, count ?? data.length));

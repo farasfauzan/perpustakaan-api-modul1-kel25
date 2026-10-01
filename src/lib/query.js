@@ -87,6 +87,25 @@ export function queryBoolean(query, field) {
 }
 
 /**
+ * Validasi nilai enum pada query string.
+ * Berbeda dengan `enumValue` di validate.js yang khusus request body (422),
+ * parameter query yang salah adalah permintaan yang cacat sehingga dibalas 400
+ * — sama seperti validator query lain di file ini.
+ */
+export function queryEnum(query, field, allowed) {
+  const raw = single(query[field], field);
+  if (raw === undefined) return undefined;
+
+  const match = allowed.find((option) => option.toLowerCase() === raw.toLowerCase());
+  if (!match) {
+    throw ApiError.badRequest(`Parameter "${field}" harus salah satu dari: ${allowed.join(', ')}.`, {
+      allowed,
+    });
+  }
+  return match;
+}
+
+/**
  * Pola untuk kolom pencarian `search_text` di view v_books / v_loans.
  * PostgREST memakai tanda `*` sebagai pengganti `%` pada operator ilike.
  */

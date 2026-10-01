@@ -9,17 +9,16 @@ import {
   parsePagination,
   parseSort,
   queryDate,
+  queryEnum,
   queryText,
   queryUuid,
   searchPattern,
-  single,
 } from '../lib/query.js';
 import {
   assertKnownKeys,
   assertObject,
   dateOnly,
   dropUndefined,
-  enumValue,
   text,
   uuid,
 } from '../lib/validate.js';
@@ -56,10 +55,8 @@ router.get('/', async (req, res) => {
 
   let query = db().from(VIEW).select('*', { count: 'exact' });
 
-  const status = single(req.query.status, 'status');
-  if (status !== undefined) {
-    query = query.eq('status', enumValue(status, 'status', LOAN_STATUS, { required: true }));
-  }
+  const status = queryEnum(req.query, 'status', LOAN_STATUS);
+  if (status !== undefined) query = query.eq('status', status);
 
   const memberId = queryUuid(req.query, 'member_id');
   if (memberId !== undefined) query = query.eq('member_id', memberId);
