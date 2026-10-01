@@ -44,15 +44,22 @@ function hasJsonBody(req) {
 
 /**
  * Vercel sudah mem-parse body JSON sebelum fungsi dipanggil, dan stream request
- * ikut habis dikonsumsi. Kalau stream yang sudah habis itu dibaca ulang,
- * kegagalannya bukan error parsing biasa sehingga lolos ke handler 500 —
- * padahal request seperti itu semestinya dibalas 400. Karena itu parser Express
- * hanya dipakai kalau body belum di-parse DAN stream-nya masih bisa dibaca;
- * body yang tidak terbaca akan ditolak `assertObject` dengan 400.
+ * ikut habis dikonsumsi. Membaca ulang stream yang sudah habis itu gagal dengan
+ * bentuk error yang berbeda-beda antar-runtime, jadi parser Express hanya
+ * dipakai kalau body belum di-parse DAN stream-nya masih bisa dibaca.
  */
 app.use((req, res, next) => {
   if (req.body !== undefined || !hasJsonBody(req) || !req.readable) return next();
-  return jsonParser(req, res, next);
+
+  jsonParser(req, res, (error) => {
+    if (!error) return next();
+    // Kegagalan apa pun saat membaca body JSON tetap berarti permintaan yang
+    // cacat, bukan kesalahan server. Bentuk error internal body-parser tidak
+    // konsisten (di Vercel stream-nya sudah dikonsumsi platform), jadi semuanya
+    // dinormalkan ke 400 supaya tidak lolos menjadi 500.
+    if (error.type === 'entity.too.large') return next(error);
+    return next(ApiError.invalidJson());
+  });
 });
 
 function serviceInfo(req, res) {

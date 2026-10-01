@@ -16,6 +16,10 @@ export class ApiError extends Error {
     return new ApiError(400, 'BAD_REQUEST', message, details);
   }
 
+  static invalidJson(message = 'Body bukan JSON yang valid.', details = null) {
+    return new ApiError(400, 'INVALID_JSON', message, details);
+  }
+
   static notFound(message, details = null) {
     return new ApiError(404, 'NOT_FOUND', message, details);
   }
