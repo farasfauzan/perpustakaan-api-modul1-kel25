@@ -36,13 +36,22 @@ app.disable('x-powered-by');
 app.set('trust proxy', true);
 app.use(cors());
 
+/** Request ini membawa body JSON sesuai header Content-Type. */
+function hasJsonBody(req) {
+  const type = req.headers['content-type'] ?? '';
+  return type.split(';')[0].trim().toLowerCase() === 'application/json';
+}
+
 /**
- * Vercel sudah mem-parse body JSON sebelum fungsi dipanggil (req.body berupa
- * objek). Di server lokal belum, jadi parser Express dipakai. Dua kondisi ini
- * ditangani di satu tempat supaya perilakunya sama di lokal dan di Vercel.
+ * Vercel sudah mem-parse body JSON sebelum fungsi dipanggil, dan stream request
+ * ikut habis dikonsumsi. Kalau stream yang sudah habis itu dibaca ulang,
+ * kegagalannya bukan error parsing biasa sehingga lolos ke handler 500 —
+ * padahal request seperti itu semestinya dibalas 400. Karena itu parser Express
+ * hanya dipakai kalau body belum di-parse DAN stream-nya masih bisa dibaca;
+ * body yang tidak terbaca akan ditolak `assertObject` dengan 400.
  */
 app.use((req, res, next) => {
-  if (req.body !== undefined) return next();
+  if (req.body !== undefined || !hasJsonBody(req) || !req.readable) return next();
   return jsonParser(req, res, next);
 });
 
