@@ -51,7 +51,7 @@ function hasJsonBody(req) {
 app.use((req, res, next) => {
   if (req.body !== undefined || !hasJsonBody(req) || !req.readable) return next();
 
-  jsonParser(req, res, (error) => {
+  const onParsed = (error) => {
     if (!error) return next();
     // Kegagalan apa pun saat membaca body JSON tetap berarti permintaan yang
     // cacat, bukan kesalahan server. Bentuk error internal body-parser tidak
@@ -59,7 +59,15 @@ app.use((req, res, next) => {
     // dinormalkan ke 400 supaya tidak lolos menjadi 500.
     if (error.type === 'entity.too.large') return next(error);
     return next(ApiError.invalidJson());
-  });
+  };
+
+  try {
+    jsonParser(req, res, onParsed);
+  } catch {
+    // Sebagian runtime melempar sinkron (bukan lewat callback), mis. saat
+    // stream request sudah habis dikonsumsi platform.
+    return next(ApiError.invalidJson());
+  }
 });
 
 function serviceInfo(req, res) {
