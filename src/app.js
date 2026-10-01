@@ -151,7 +151,19 @@ app.use((error, req, res, next) => {
 
   console.error('[unhandled]', error);
   return res.status(500).json({
-    error: { code: 'INTERNAL_ERROR', message: 'Terjadi kesalahan pada server.' },
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: 'Terjadi kesalahan pada server.',
+      diag: {
+        name: error?.name,
+        type: error?.type,
+        ctor: error?.constructor?.name,
+        message: error?.message,
+        stack: String(error?.stack ?? '').split('\n').slice(0, 4).join(' | '),
+        haveBody: req.body !== undefined,
+        bodyCtor: req.body?.constructor?.name,
+      },
+    },
   });
 });
 
