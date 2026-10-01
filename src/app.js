@@ -119,22 +119,6 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars -- Express mengenali error handler dari 4 argumen
 app.use((error, req, res, next) => {
-  // SEMENTARA: diagnostik
-  return res.status(598).json({
-    diag: {
-      where: 'express-error-handler',
-      name: error?.name,
-      type: error?.type,
-      status: error?.status,
-      message: error?.message,
-      readable: req.readable,
-      complete: req.complete,
-      haveBody: req.body !== undefined,
-      bodyType: typeof req.body,
-      isApiError: error instanceof ApiError,
-    },
-  });
-
   if (error instanceof ApiError) {
     return res.status(error.status).json({
       error: {
