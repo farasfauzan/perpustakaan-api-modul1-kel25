@@ -76,6 +76,7 @@ permintaan soal.
 │   ├── schema.sql            # tabel, view, index, trigger, hak akses
 │   └── seed.sql              # data contoh (opsional)
 ├── .env.example
+├── LICENSE
 └── vercel.json
 ```
 
