@@ -43,13 +43,32 @@ function hasJsonBody(req) {
 }
 
 /**
+ * Vercel memasang `req.body` sebagai getter yang mem-parse body JSON saat
+ * properti itu diakses. Kalau body-nya rusak, getter tersebut melempar ApiError
+ * milik Vercel sendiri — class yang berbeda dari ApiError kita, dengan
+ * `status: 400`. Jadi setiap akses ke `req.body` harus dibungkus, kalau tidak
+ * error itu lolos ke handler terakhir dan berubah menjadi 500.
+ */
+function readBody(req) {
+  try {
+    return { value: req.body };
+  } catch (error) {
+    return { error };
+  }
+}
+
+/**
  * Vercel sudah mem-parse body JSON sebelum fungsi dipanggil, dan stream request
  * ikut habis dikonsumsi. Membaca ulang stream yang sudah habis itu gagal dengan
  * bentuk error yang berbeda-beda antar-runtime, jadi parser Express hanya
  * dipakai kalau body belum di-parse DAN stream-nya masih bisa dibaca.
  */
 app.use((req, res, next) => {
-  if (req.body !== undefined || !hasJsonBody(req) || !req.readable) return next();
+  if (!hasJsonBody(req)) return next();
+
+  const { value: parsedBody, error: bodyError } = readBody(req);
+  if (bodyError) return next(bodyError);
+  if (parsedBody !== undefined || !req.readable) return next();
 
   const onParsed = (error) => {
     if (!error) return next();
@@ -134,6 +153,15 @@ app.use((error, req, res, next) => {
         message: error.message,
         ...(error.details ? { details: error.details } : {}),
       },
+    });
+  }
+
+  // Vercel melempar ApiError miliknya sendiri (class berbeda dari ApiError
+  // kita) untuk body JSON yang rusak. Error itu hanya bisa dikenali dari
+  // status 400-nya, jadi jangan sampai lolos menjadi 500.
+  if (error?.status === 400 || error?.statusCode === 400) {
+    return res.status(400).json({
+      error: { code: 'INVALID_JSON', message: 'Body bukan JSON yang valid.' },
     });
   }
 
