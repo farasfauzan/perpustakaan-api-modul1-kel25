@@ -267,8 +267,15 @@ Bentuk respons:
 
 ## 4. Contoh request dan response
 
-Semua contoh memakai base URL deployment. Ganti `<uuid>` dengan id nyata dari
-respons sebelumnya.
+Semua contoh memakai base URL deployment dan id dari data contoh
+(`supabase/seed.sql`), jadi bisa langsung di-copy-paste ke terminal, Postman,
+atau Insomnia.
+
+Nilai yang dibuat otomatis oleh server (`id`, `loan_code`, `created_at`,
+`updated_at`, dan tanggal yang tidak dikirim) tentu berbeda setiap kali
+dipanggil; contoh di bawah hanya menunjukkan bentuknya. Contoh `PATCH` dan
+`DELETE` mengubah data contoh tersebut — jalankan ulang `supabase/seed.sql` di
+Supabase SQL Editor untuk mengembalikan kondisi awal.
 
 ### 4.1 `GET /` — cek layanan
 
@@ -303,12 +310,12 @@ curl https://perpustakaan-api-modul1-kel25.vercel.app/health
 curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/books \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "Clean Code",
-    "author": "Robert C. Martin",
-    "isbn": "9780132350884",
+    "title": "Pemrograman Berorientasi Objek",
+    "author": "Adi Nugroho",
+    "isbn": "9789792912456",
     "category": "Teknologi",
-    "publisher": "Prentice Hall",
-    "published_year": 2008,
+    "publisher": "Andi",
+    "published_year": 2016,
     "total_copies": 3
   }'
 ```
@@ -316,21 +323,24 @@ curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/books \
 ```json
 {
   "data": {
-    "id": "8f14e45f-ceea-467f-a1a1-1f0f2c9a1b7e",
-    "title": "Clean Code",
-    "author": "Robert C. Martin",
-    "isbn": "9780132350884",
+    "id": "ef12a4a2-5ea0-460b-99d0-ae86efd54ea0",
+    "title": "Pemrograman Berorientasi Objek",
+    "author": "Adi Nugroho",
+    "isbn": "9789792912456",
     "category": "Teknologi",
-    "publisher": "Prentice Hall",
-    "published_year": 2008,
+    "publisher": "Andi",
+    "published_year": 2016,
     "total_copies": 3,
     "available_copies": 3,
     "borrowed_copies": 0,
-    "created_at": "2026-09-30T03:12:44.512+00:00",
-    "updated_at": "2026-09-30T03:12:44.512+00:00"
+    "created_at": "2026-10-06T11:20:38.745+00:00",
+    "updated_at": "2026-10-06T11:20:38.745+00:00"
   }
 }
 ```
+
+ISBN bersifat unik, jadi kirim `409 CONFLICT` kalau ISBN-nya sudah terdaftar —
+misalnya kalau contoh di atas dijalankan dua kali.
 
 ### 4.4 `GET /books?q=&available=` — cari buku yang masih tersedia
 
@@ -342,10 +352,10 @@ curl "https://perpustakaan-api-modul1-kel25.vercel.app/books?q=clean%20code&avai
 {
   "data": [
     {
-      "id": "8f14e45f-ceea-467f-a1a1-1f0f2c9a1b7e",
+      "id": "b0000001-0000-4000-8000-000000000004",
       "title": "Clean Code",
-      "total_copies": 3,
-      "available_copies": 2,
+      "total_copies": 2,
+      "available_copies": 1,
       "borrowed_copies": 1
     }
   ],
@@ -361,25 +371,27 @@ curl "https://perpustakaan-api-modul1-kel25.vercel.app/books?q=clean%20code&avai
 curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/members \
   -H "Content-Type: application/json" \
   -d '{
-    "full_name": "Nadia Puspita Sari",
-    "email": "nadia@students.undip.ac.id",
-    "phone": "081200000003"
+    "full_name": "Dewi Lestari",
+    "email": "dewi@students.undip.ac.id",
+    "phone": "081200000006"
   }'
 ```
 
 ```json
 {
   "data": {
-    "id": "3e7c1a90-5b2d-4f61-9c8e-0d6a2b7c4f19",
-    "member_code": "AGT-7K2QMP",
-    "full_name": "Nadia Puspita Sari",
-    "email": "nadia@students.undip.ac.id",
-    "phone": "081200000003",
+    "id": "a6d813d6-37f5-482d-bf20-bf572be7cf16",
+    "member_code": "AGT-MT7Q8D",
+    "full_name": "Dewi Lestari",
+    "email": "dewi@students.undip.ac.id",
+    "phone": "081200000006",
     "status": "Aktif",
-    "joined_at": "2026-09-30"
+    "joined_at": "2026-10-06"
   }
 }
 ```
+
+Email juga unik, jadi `409 CONFLICT` kalau email-nya sudah dipakai.
 
 ### 4.6 `POST /loans` — catat peminjaman
 
@@ -389,8 +401,8 @@ curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/members \
 curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/loans \
   -H "Content-Type: application/json" \
   -d '{
-    "book_id": "8f14e45f-ceea-467f-a1a1-1f0f2c9a1b7e",
-    "member_id": "3e7c1a90-5b2d-4f61-9c8e-0d6a2b7c4f19",
+    "book_id": "b0000001-0000-4000-8000-000000000001",
+    "member_id": "a0000001-0000-4000-8000-000000000002",
     "notes": "Dipinjam untuk tugas akhir."
   }'
 ```
@@ -398,35 +410,36 @@ curl -X POST https://perpustakaan-api-modul1-kel25.vercel.app/loans \
 ```json
 {
   "data": {
-    "id": "b1d0c7a4-2e35-4a91-8f77-5c2b9d0e4311",
-    "loan_code": "PJM-20260930-4H7B",
-    "book_id": "8f14e45f-ceea-467f-a1a1-1f0f2c9a1b7e",
-    "member_id": "3e7c1a90-5b2d-4f61-9c8e-0d6a2b7c4f19",
-    "borrowed_at": "2026-09-30",
-    "due_at": "2026-10-07",
+    "id": "4a8a976d-7fd6-45e4-910e-8f18ec01c997",
+    "loan_code": "PJM-20261006-AMMC",
+    "book_id": "b0000001-0000-4000-8000-000000000001",
+    "member_id": "a0000001-0000-4000-8000-000000000002",
+    "borrowed_at": "2026-10-06",
+    "due_at": "2026-10-13",
     "returned_at": null,
     "notes": "Dipinjam untuk tugas akhir.",
     "status": "Dipinjam",
     "days_late": 0,
-    "book_title": "Clean Code",
-    "book_author": "Robert C. Martin",
-    "book_isbn": "9780132350884",
-    "member_code": "AGT-7K2QMP",
-    "member_name": "Nadia Puspita Sari",
-    "member_email": "nadia@students.undip.ac.id",
-    "created_at": "2026-09-30T03:20:10.884+00:00",
-    "updated_at": "2026-09-30T03:20:10.884+00:00"
+    "book_title": "Laskar Pelangi",
+    "book_author": "Andrea Hirata",
+    "book_isbn": "9789793062792",
+    "member_code": "AGT-0002",
+    "member_name": "Ade Raihan Hakim",
+    "member_email": "ade@students.undip.ac.id",
+    "created_at": "2026-10-06T11:25:34.009+00:00",
+    "updated_at": "2026-10-06T11:25:34.009+00:00"
   }
 }
 ```
 
-Kalau stok habis, API membalas `409`:
+Kalau stoknya habis — contohnya buku `Buku Tanpa Salinan` pada data contoh —
+API membalas `409`:
 
 ```json
 {
   "error": {
     "code": "CONFLICT",
-    "message": "Semua salinan \"Clean Code\" sedang dipinjam (3 eksemplar)."
+    "message": "Semua salinan \"Buku Tanpa Salinan\" sedang dipinjam (0 eksemplar)."
   }
 }
 ```
@@ -464,14 +477,17 @@ curl "https://perpustakaan-api-modul1-kel25.vercel.app/loans?borrowed_from=2026-
 
 ### 4.8 `GET /loans/:id` — detail
 
+Contoh 4.8–4.10 memakai satu peminjaman pada data contoh (`PJM-CONTOH-0006`),
+jadi bisa langsung dijalankan berurutan: baca → tandai dikembalikan → hapus.
+
 ```bash
-curl https://perpustakaan-api-modul1-kel25.vercel.app/loans/b1d0c7a4-2e35-4a91-8f77-5c2b9d0e4311
+curl https://perpustakaan-api-modul1-kel25.vercel.app/loans/c0000001-0000-4000-8000-000000000006
 ```
 
 ```json
 {
   "data": {
-    "loan_code": "PJM-20260930-4H7B",
+    "loan_code": "PJM-CONTOH-0006",
     "status": "Dipinjam",
     "days_late": 0,
     "due_at": "2026-10-07"
@@ -485,7 +501,7 @@ Mengembalikan buku = mengisi `returned_at`. Kirim `"returned_at": null` untuk
 membatalkan pengembalian.
 
 ```bash
-curl -X PATCH https://perpustakaan-api-modul1-kel25.vercel.app/loans/b1d0c7a4-2e35-4a91-8f77-5c2b9d0e4311 \
+curl -X PATCH https://perpustakaan-api-modul1-kel25.vercel.app/loans/c0000001-0000-4000-8000-000000000006 \
   -H "Content-Type: application/json" \
   -d '{ "returned_at": "2026-10-02", "notes": "Dikembalikan, kondisi baik." }'
 ```
@@ -493,7 +509,7 @@ curl -X PATCH https://perpustakaan-api-modul1-kel25.vercel.app/loans/b1d0c7a4-2e
 ```json
 {
   "data": {
-    "loan_code": "PJM-20260930-4H7B",
+    "loan_code": "PJM-CONTOH-0006",
     "borrowed_at": "2026-09-30",
     "due_at": "2026-10-07",
     "returned_at": "2026-10-02",
@@ -506,7 +522,7 @@ curl -X PATCH https://perpustakaan-api-modul1-kel25.vercel.app/loans/b1d0c7a4-2e
 ### 4.10 `DELETE /loans/:id`
 
 ```bash
-curl -i -X DELETE https://perpustakaan-api-modul1-kel25.vercel.app/loans/b1d0c7a4-2e35-4a91-8f77-5c2b9d0e4311
+curl -i -X DELETE https://perpustakaan-api-modul1-kel25.vercel.app/loans/c0000001-0000-4000-8000-000000000006
 ```
 
 ```
