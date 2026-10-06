@@ -271,9 +271,9 @@ Semua contoh memakai base URL deployment dan id dari data contoh
 (`supabase/seed.sql`), jadi bisa langsung di-copy-paste ke terminal, Postman,
 atau Insomnia.
 
-Nilai yang dibuat otomatis oleh server (`id`, `loan_code`, `created_at`,
-`updated_at`, dan tanggal yang tidak dikirim) tentu berbeda setiap kali
-dipanggil; contoh di bawah hanya menunjukkan bentuknya. Contoh `PATCH` dan
+Nilai yang dibuat otomatis oleh server (`id`, `member_code`, `loan_code`,
+`created_at`, `updated_at`, dan tanggal yang tidak dikirim) tentu berbeda
+setiap kali dipanggil; contoh di bawah hanya menunjukkan bentuknya. Contoh `PATCH` dan
 `DELETE` mengubah data contoh tersebut — jalankan ulang `supabase/seed.sql` di
 Supabase SQL Editor untuk mengembalikan kondisi awal.
 
